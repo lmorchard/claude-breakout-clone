@@ -315,36 +315,10 @@ export class GameScene extends Phaser.Scene {
   }
 
   public addBall(x: number, y: number, velocityX: number, velocityY: number): Ball {
-    // Ensure spawn position is within bounds
-    let adjustedX = x
-    let adjustedY = y
+    // Find a safe spawn position that doesn't overlap with existing objects
+    const safePosition = this.findSafeSpawnPosition(x, y)
     
-    const ballRadius = GameConfig.BALL_SIZE / 2
-    const minX = ballRadius
-    const maxX = GameConfig.GAME_WIDTH - ballRadius
-    const minY = GameConfig.STATUS_BAR_HEIGHT + ballRadius
-    const maxY = GameConfig.GAME_HEIGHT - ballRadius
-    
-    // Clamp position to valid bounds
-    adjustedX = Math.max(minX, Math.min(maxX, adjustedX))
-    adjustedY = Math.max(minY, Math.min(maxY, adjustedY))
-    
-    // Avoid spawning inside bricks by checking if position is in brick area
-    const brickAreaTop = GameConfig.STATUS_BAR_HEIGHT + GameConfig.STATUS_BAR_MARGIN * 2
-    const brickAreaBottom = brickAreaTop + (GameConfig.BRICK_ROWS * (GameConfig.BRICK_HEIGHT + GameConfig.BRICK_SPACING)) + GameConfig.BRICK_SPACING
-    
-    if (adjustedY >= brickAreaTop && adjustedY <= brickAreaBottom) {
-      // If in brick area, move below it with some buffer
-      adjustedY = brickAreaBottom + ballRadius + 20
-    }
-    
-    // Add small random Y offset to prevent perfect overlaps
-    adjustedY += (Math.random() - 0.5) * 10
-    
-    // Ensure we haven't moved outside bounds after brick avoidance
-    adjustedY = Math.max(minY, Math.min(maxY, adjustedY))
-    
-    const newBall = new Ball(this, adjustedX, adjustedY)
+    const newBall = new Ball(this, safePosition.x, safePosition.y)
     this.balls.push(newBall)
     this.setupBallCollisions(newBall)
     
@@ -433,5 +407,102 @@ export class GameScene extends Phaser.Scene {
     // Remove the powerup
     this.powerups.remove(powerup)
     powerup.destroy()
+  }
+
+  private findSafeSpawnPosition(preferredX: number, preferredY: number): { x: number, y: number } {
+    const ballRadius = GameConfig.BALL_SIZE / 2
+    const minX = ballRadius
+    const maxX = GameConfig.GAME_WIDTH - ballRadius
+    const minY = GameConfig.STATUS_BAR_HEIGHT + ballRadius
+    const maxY = GameConfig.GAME_HEIGHT - ballRadius
+    
+    // Start with the preferred position, clamped to bounds
+    let adjustedX = Math.max(minX, Math.min(maxX, preferredX))
+    let adjustedY = Math.max(minY, Math.min(maxY, preferredY))
+    
+    // Try to find a position that doesn't overlap with any objects
+    const maxAttempts = 20
+    const searchRadius = 50
+    
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      // Check if current position overlaps with any objects
+      if (!this.isPositionColliding(adjustedX, adjustedY, ballRadius)) {
+        // Found a safe position
+        return { x: adjustedX, y: adjustedY }
+      }
+      
+      // Try a new position in a spiral pattern around the preferred position
+      const angle = (attempt / maxAttempts) * Math.PI * 2 * 3 // 3 spirals
+      const distance = (attempt / maxAttempts) * searchRadius
+      
+      adjustedX = preferredX + Math.cos(angle) * distance
+      adjustedY = preferredY + Math.sin(angle) * distance
+      
+      // Clamp to bounds again
+      adjustedX = Math.max(minX, Math.min(maxX, adjustedX))
+      adjustedY = Math.max(minY, Math.min(maxY, adjustedY))
+    }
+    
+    // If we couldn't find a safe position, fall back to a safe area below bricks
+    const brickAreaTop = GameConfig.STATUS_BAR_HEIGHT + GameConfig.STATUS_BAR_MARGIN * 2
+    const brickAreaBottom = brickAreaTop + (GameConfig.BRICK_ROWS * (GameConfig.BRICK_HEIGHT + GameConfig.BRICK_SPACING)) + GameConfig.BRICK_SPACING
+    const safeY = Math.max(brickAreaBottom + ballRadius + 20, minY)
+    
+    return { 
+      x: Math.max(minX, Math.min(maxX, preferredX)), 
+      y: Math.min(safeY, maxY) 
+    }
+  }
+
+  private isPositionColliding(x: number, y: number, radius: number): boolean {
+    // Create a temporary circle to test collisions
+    const testCircle = { x, y, radius }
+    
+    // Check collision with bricks
+    const bricks = this.brickGrid.getBricks().children.entries
+    for (const brick of bricks) {
+      if (brick.active && this.circleRectCollision(testCircle, brick as any)) {
+        return true
+      }
+    }
+    
+    // Check collision with paddle
+    if (this.circleRectCollision(testCircle, this.paddle)) {
+      return true
+    }
+    
+    // Check collision with existing balls
+    for (const ball of this.balls) {
+      const distance = Math.sqrt((x - ball.x) ** 2 + (y - ball.y) ** 2)
+      if (distance < radius + GameConfig.BALL_SIZE / 2) {
+        return true
+      }
+    }
+    
+    // Check collision with powerups
+    for (const powerup of this.powerups.children.entries) {
+      if (powerup.active && this.circleRectCollision(testCircle, powerup as any)) {
+        return true
+      }
+    }
+    
+    return false
+  }
+
+  private circleRectCollision(circle: { x: number, y: number, radius: number }, rect: any): boolean {
+    // Get rectangle bounds
+    const rectLeft = rect.x - rect.width / 2
+    const rectRight = rect.x + rect.width / 2
+    const rectTop = rect.y - rect.height / 2
+    const rectBottom = rect.y + rect.height / 2
+    
+    // Find the closest point on the rectangle to the circle center
+    const closestX = Math.max(rectLeft, Math.min(circle.x, rectRight))
+    const closestY = Math.max(rectTop, Math.min(circle.y, rectBottom))
+    
+    // Calculate distance between circle center and closest point
+    const distance = Math.sqrt((circle.x - closestX) ** 2 + (circle.y - closestY) ** 2)
+    
+    return distance < circle.radius
   }
 }
