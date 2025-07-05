@@ -402,6 +402,8 @@ export class GameScene extends Phaser.Scene {
     
     if (powerup) {
       this.powerups.add(powerup)
+      // Initialize physics after adding to group
+      powerup.initializePhysics()
     }
     
     return powerup

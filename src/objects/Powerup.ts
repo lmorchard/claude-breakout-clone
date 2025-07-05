@@ -19,11 +19,7 @@ export class Powerup extends Phaser.Physics.Arcade.Sprite {
     // Create visual representation
     this.createVisual()
     
-    // Set physics properties
-    const body = this.body as Phaser.Physics.Arcade.Body
-    body.setVelocity(0, GameConfig.POWERUP_FALL_SPEED)
-    body.setBounce(0, 0)
-    body.setCollideWorldBounds(false)
+    // Physics properties will be set after adding to physics group
   }
 
   private createVisual() {
@@ -44,6 +40,16 @@ export class Powerup extends Phaser.Physics.Arcade.Sprite {
     // Set graphics position to match sprite
     graphics.x = this.x
     graphics.y = this.y
+  }
+
+  public initializePhysics(): void {
+    // Set physics properties after being added to physics group
+    if (this.body) {
+      const body = this.body as Phaser.Physics.Arcade.Body
+      body.setVelocity(0, GameConfig.POWERUP_FALL_SPEED)
+      body.setBounce(0, 0)
+      body.setCollideWorldBounds(false)
+    }
   }
 
   public activate(gameScene: any): void {
