@@ -315,10 +315,20 @@ export class GameScene extends Phaser.Scene {
   }
 
   public addBall(x: number, y: number, velocityX: number, velocityY: number): Ball {
-    // Find a safe spawn position that doesn't overlap with existing objects
-    const safePosition = this.findSafeSpawnPosition(x, y)
+    // Temporarily use a simpler approach - always spawn in safe zone below bricks
+    const ballRadius = GameConfig.BALL_SIZE / 2
+    const brickAreaTop = GameConfig.STATUS_BAR_HEIGHT + GameConfig.STATUS_BAR_MARGIN * 2
+    const brickAreaBottom = brickAreaTop + (GameConfig.BRICK_ROWS * (GameConfig.BRICK_HEIGHT + GameConfig.BRICK_SPACING)) + GameConfig.BRICK_SPACING
+    const safeZoneY = brickAreaBottom + 100 // Well below bricks
     
-    const newBall = new Ball(this, safePosition.x, safePosition.y)
+    // Clamp X to valid bounds
+    const minX = ballRadius
+    const maxX = GameConfig.GAME_WIDTH - ballRadius
+    const safeX = Math.max(minX, Math.min(maxX, x))
+    
+    console.log(`Spawning ball at safe position: (${safeX}, ${safeZoneY}) instead of preferred (${x}, ${y})`)
+    
+    const newBall = new Ball(this, safeX, safeZoneY)
     this.balls.push(newBall)
     this.setupBallCollisions(newBall)
     
@@ -331,15 +341,11 @@ export class GameScene extends Phaser.Scene {
       }
     })
     
-    // Set velocity after ball is created with small delay to ensure physics stability
+    // Set velocity immediately after ball is created
     if (newBall.body) {
       const body = newBall.body as Phaser.Physics.Arcade.Body
-      // Use a small delay to ensure ball is properly positioned before setting velocity
-      this.time.delayedCall(10, () => {
-        if (newBall.body) {
-          body.setVelocity(velocityX, velocityY)
-        }
-      })
+      body.setVelocity(velocityX, velocityY)
+      console.log(`Set velocity: (${velocityX}, ${velocityY})`)
     }
     
     return newBall
@@ -416,18 +422,24 @@ export class GameScene extends Phaser.Scene {
     const minY = GameConfig.STATUS_BAR_HEIGHT + ballRadius
     const maxY = GameConfig.GAME_HEIGHT - ballRadius
     
+    console.log(`Finding safe spawn position for preferred (${preferredX}, ${preferredY})`)
+    
     // Start with the preferred position, clamped to bounds
     let adjustedX = Math.max(minX, Math.min(maxX, preferredX))
     let adjustedY = Math.max(minY, Math.min(maxY, preferredY))
     
     // Try to find a position that doesn't overlap with any objects
     const maxAttempts = 20
-    const searchRadius = 50
+    const searchRadius = 100 // Increased search radius
     
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       // Check if current position overlaps with any objects
-      if (!this.isPositionColliding(adjustedX, adjustedY, ballRadius)) {
+      const colliding = this.isPositionColliding(adjustedX, adjustedY, ballRadius + 5) // Add small buffer
+      console.log(`Attempt ${attempt}: position (${adjustedX.toFixed(1)}, ${adjustedY.toFixed(1)}) - colliding: ${colliding}`)
+      
+      if (!colliding) {
         // Found a safe position
+        console.log(`Found safe position: (${adjustedX}, ${adjustedY})`)
         return { x: adjustedX, y: adjustedY }
       }
       
@@ -446,8 +458,9 @@ export class GameScene extends Phaser.Scene {
     // If we couldn't find a safe position, fall back to a safe area below bricks
     const brickAreaTop = GameConfig.STATUS_BAR_HEIGHT + GameConfig.STATUS_BAR_MARGIN * 2
     const brickAreaBottom = brickAreaTop + (GameConfig.BRICK_ROWS * (GameConfig.BRICK_HEIGHT + GameConfig.BRICK_SPACING)) + GameConfig.BRICK_SPACING
-    const safeY = Math.max(brickAreaBottom + ballRadius + 20, minY)
+    const safeY = Math.max(brickAreaBottom + ballRadius + 50, minY) // Increased buffer
     
+    console.log(`Fallback to safe area: (${preferredX}, ${safeY})`)
     return { 
       x: Math.max(minX, Math.min(maxX, preferredX)), 
       y: Math.min(safeY, maxY) 
