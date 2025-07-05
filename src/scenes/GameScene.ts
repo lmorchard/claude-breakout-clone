@@ -125,8 +125,8 @@ export class GameScene extends Phaser.Scene {
 
     // Ball vs Bricks
     this.physics.add.collider(this.ball, this.brickGrid.getBricks(), (_ball, brick) => {
-      // Simple bounce - just reverse Y direction for most brick hits
-      this.ball.bounceOffBrick()
+      // Determine collision side (simplified)
+      this.ball.bounceOffBrick('top')
       
       // Destroy brick and award points
       const points = this.brickGrid.destroyBrick(brick as any)
