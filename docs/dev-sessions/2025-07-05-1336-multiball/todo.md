@@ -14,7 +14,7 @@
 - [x] Add powerup management to GameScene
 
 ## Phase 4: Powerup Spawning
-- [ ] Integrate powerup spawning with brick destruction
+- [x] Integrate powerup spawning with brick destruction
 
 ## Phase 5: Multiball Behavior
 - [ ] Implement multiball powerup activation logic

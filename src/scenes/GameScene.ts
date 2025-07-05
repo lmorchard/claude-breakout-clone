@@ -142,12 +142,21 @@ export class GameScene extends Phaser.Scene {
 
     // Ball vs Bricks
     this.physics.add.collider(ball, this.brickGrid.getBricks(), (_ball, brick) => {
+      // Store brick position before destruction
+      const brickX = (brick as any).x
+      const brickY = (brick as any).y
+      
       // Determine collision side (simplified)
       ball.bounceOffBrick('top')
       
       // Destroy brick and award points
       const points = this.brickGrid.destroyBrick(brick as any)
       this.updateScore(points)
+      
+      // Check for powerup spawn
+      if (Math.random() < GameConfig.POWERUP_SPAWN_CHANCE) {
+        this.spawnPowerup(brickX, brickY, 'multiball')
+      }
       
       // Check for victory
       if (this.brickGrid.areAllDestroyed()) {
