@@ -147,9 +147,18 @@ export class Ball extends Phaser.Physics.Arcade.Sprite {
       body.setVelocity(velocityX, velocityY)
     }
     
-    // Fallback speed check (less frequent)
+    // Fallback speed check and stuck ball detection
     const finalSpeed = Math.sqrt(body.velocity.x ** 2 + body.velocity.y ** 2)
-    if (finalSpeed > 0 && Math.abs(finalSpeed - GameConfig.BALL_SPEED) > 20) {
+    
+    if (finalSpeed < 10) {
+      // Ball is stuck or moving too slowly - give it a random velocity
+      const randomAngle = Math.random() * Math.PI * 2
+      const newVelX = Math.cos(randomAngle) * GameConfig.BALL_SPEED
+      const newVelY = Math.sin(randomAngle) * GameConfig.BALL_SPEED
+      body.setVelocity(newVelX, newVelY)
+      console.log(`Ball was stuck (speed: ${finalSpeed}), giving random velocity: (${newVelX}, ${newVelY})`)
+    } else if (Math.abs(finalSpeed - GameConfig.BALL_SPEED) > 20) {
+      // Speed is too different from target, normalize it
       const ratio = GameConfig.BALL_SPEED / finalSpeed
       body.setVelocity(body.velocity.x * ratio, body.velocity.y * ratio)
     }
