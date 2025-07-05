@@ -125,9 +125,8 @@ export class GameScene extends Phaser.Scene {
 
     // Ball vs Bricks
     this.physics.add.collider(this.ball, this.brickGrid.getBricks(), (_ball, brick) => {
-      // Calculate collision side based on ball and brick positions
-      const collisionSide = this.calculateCollisionSide(this.ball, brick as any)
-      this.ball.bounceOffBrick(collisionSide)
+      // Simple bounce - just reverse Y direction for most brick hits
+      this.ball.bounceOffBrick()
       
       // Destroy brick and award points
       const points = this.brickGrid.destroyBrick(brick as any)
@@ -138,33 +137,6 @@ export class GameScene extends Phaser.Scene {
         this.scene.start('GameOverScene', { score: this.score, won: true })
       }
     })
-  }
-
-  private calculateCollisionSide(ball: any, brick: any): 'top' | 'bottom' | 'left' | 'right' {
-    // Calculate overlap on each side
-    const ballLeft = ball.x - GameConfig.BALL_SIZE / 2
-    const ballRight = ball.x + GameConfig.BALL_SIZE / 2
-    const ballTop = ball.y - GameConfig.BALL_SIZE / 2
-    const ballBottom = ball.y + GameConfig.BALL_SIZE / 2
-    
-    const brickLeft = brick.x - GameConfig.BRICK_WIDTH / 2
-    const brickRight = brick.x + GameConfig.BRICK_WIDTH / 2
-    const brickTop = brick.y - GameConfig.BRICK_HEIGHT / 2
-    const brickBottom = brick.y + GameConfig.BRICK_HEIGHT / 2
-    
-    // Calculate overlap distances
-    const overlapLeft = ballRight - brickLeft
-    const overlapRight = brickRight - ballLeft
-    const overlapTop = ballBottom - brickTop
-    const overlapBottom = brickBottom - ballTop
-    
-    // Find the smallest overlap to determine collision side
-    const minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom)
-    
-    if (minOverlap === overlapTop) return 'top'
-    if (minOverlap === overlapBottom) return 'bottom'
-    if (minOverlap === overlapLeft) return 'left'
-    return 'right'
   }
 
   private showReadyPrompt() {

@@ -82,24 +82,15 @@ export class Ball extends Phaser.Physics.Arcade.Sprite {
     body.setVelocity(this.speedX, this.speedY)
   }
 
-  public bounceOffBrick(side: 'top' | 'bottom' | 'left' | 'right') {
+  public bounceOffBrick() {
     if (!this.body) return
 
     const body = this.body as Phaser.Physics.Arcade.Body
+    
+    // Simple approach: just reverse Y velocity for brick hits
+    // This works well for most breakout-style games
     let velocityX = body.velocity.x
-    let velocityY = body.velocity.y
-
-    // Bounce physics based on collision side
-    switch (side) {
-      case 'top':
-      case 'bottom':
-        velocityY = -velocityY
-        break
-      case 'left':
-      case 'right':
-        velocityX = -velocityX
-        break
-    }
+    let velocityY = -body.velocity.y // Reverse Y direction
     
     // Normalize to maintain consistent speed
     const currentSpeed = Math.sqrt(velocityX ** 2 + velocityY ** 2)
