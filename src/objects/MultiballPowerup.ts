@@ -6,19 +6,44 @@ export class MultiballPowerup extends Powerup {
   constructor(scene: Phaser.Scene, x: number, y: number) {
     super(scene, x, y, 'multiball')
     
-    // Add ball icon inside the powerup
-    this.createBallIcon()
+    // The visual is created in the parent constructor
+    // We'll override the visual creation to include the ball icon
   }
 
-  private createBallIcon() {
-    // Create a small ball icon in the center
-    const ballGraphics = this.scene.add.graphics()
-    ballGraphics.fillStyle(GameConfig.COLORS.BALL)
-    ballGraphics.fillCircle(0, 0, GameConfig.BALL_SIZE / 3)
+  protected createVisual() {
+    // Create a texture key for multiball powerup
+    const textureKey = `powerup-multiball`
     
-    // Set graphics position to match sprite
-    ballGraphics.x = this.x
-    ballGraphics.y = this.y
+    // Only create the texture if it doesn't exist
+    if (!this.scene.textures.exists(textureKey)) {
+      // Create graphics to draw the powerup shape
+      const graphics = this.scene.add.graphics()
+      
+      // Draw background rounded rectangle
+      graphics.fillStyle(GameConfig.COLORS.POWERUP)
+      const radius = 5
+      graphics.fillRoundedRect(
+        0, 0, 
+        GameConfig.BRICK_WIDTH,
+        GameConfig.BRICK_HEIGHT,
+        radius
+      )
+      
+      // Draw ball icon in center
+      graphics.fillStyle(GameConfig.COLORS.BALL)
+      graphics.fillCircle(
+        GameConfig.BRICK_WIDTH / 2,
+        GameConfig.BRICK_HEIGHT / 2,
+        GameConfig.BALL_SIZE / 3
+      )
+      
+      // Generate texture from graphics
+      graphics.generateTexture(textureKey, GameConfig.BRICK_WIDTH, GameConfig.BRICK_HEIGHT)
+      graphics.destroy()
+    }
+    
+    // Set the texture for this sprite
+    this.setTexture(textureKey)
   }
 
   public activate(gameScene: any): void {

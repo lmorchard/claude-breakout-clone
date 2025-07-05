@@ -9,6 +9,9 @@ export class Powerup extends Phaser.Physics.Arcade.Sprite {
     
     this.powerupType = powerupType
     
+    // Create visual representation first
+    this.createVisual()
+    
     // Add to scene
     scene.add.existing(this)
     scene.physics.add.existing(this)
@@ -16,30 +19,35 @@ export class Powerup extends Phaser.Physics.Arcade.Sprite {
     // Set size to match brick dimensions
     this.setSize(GameConfig.BRICK_WIDTH, GameConfig.BRICK_HEIGHT)
     
-    // Create visual representation
-    this.createVisual()
-    
     // Physics properties will be set after adding to physics group
   }
 
-  private createVisual() {
-    // Create rounded rectangle graphics
-    const graphics = this.scene.add.graphics()
-    graphics.fillStyle(GameConfig.COLORS.POWERUP)
+  protected createVisual() {
+    // Create a texture key for this powerup type
+    const textureKey = `powerup-${this.powerupType}`
     
-    // Draw rounded rectangle (relative to sprite center)
-    const radius = 5
-    graphics.fillRoundedRect(
-      -GameConfig.BRICK_WIDTH / 2,
-      -GameConfig.BRICK_HEIGHT / 2,
-      GameConfig.BRICK_WIDTH,
-      GameConfig.BRICK_HEIGHT,
-      radius
-    )
+    // Only create the texture if it doesn't exist
+    if (!this.scene.textures.exists(textureKey)) {
+      // Create graphics to draw the powerup shape
+      const graphics = this.scene.add.graphics()
+      graphics.fillStyle(GameConfig.COLORS.POWERUP)
+      
+      // Draw rounded rectangle
+      const radius = 5
+      graphics.fillRoundedRect(
+        0, 0, 
+        GameConfig.BRICK_WIDTH,
+        GameConfig.BRICK_HEIGHT,
+        radius
+      )
+      
+      // Generate texture from graphics
+      graphics.generateTexture(textureKey, GameConfig.BRICK_WIDTH, GameConfig.BRICK_HEIGHT)
+      graphics.destroy()
+    }
     
-    // Set graphics position to match sprite
-    graphics.x = this.x
-    graphics.y = this.y
+    // Set the texture for this sprite
+    this.setTexture(textureKey)
   }
 
   public initializePhysics(): void {
