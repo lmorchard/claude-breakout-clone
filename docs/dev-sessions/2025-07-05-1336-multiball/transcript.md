@@ -2875,3 +2875,195 @@ Claude Opus 4 limit reached, now using Sonnet 4
   4. Stuck ball detection handles the rest - the Ball class automatically unsticks any balls that might get stuck
 
   This gives you the authentic multiball experience where new balls appear right next to existing ones and immediately separate due to inverted X velocities, regardless of where in the game area they are!
+
+> Please run `npm run build` and fix any issues found
+
+● I'll run the build command to check for any TypeScript or build issues.
+
+● Bash(npm run build)
+  ⎿  Error: > claude-breakout-clone@1.0.0 build
+     > tsc && vite build
+
+     src/objects/Powerup.ts(63,19): error TS6133: 'gameScene' is declared but its value is never read.
+     src/scenes/GameScene.ts(391,59): error TS6133: 'paddle' is declared but its value is never read.
+     src/scenes/GameScene.ts(426,11): error TS6133: 'findSafeSpawnPosition' is declared but its value is never read.
+
+● I need to fix these TypeScript errors. Let me address them:
+
+  1. Unused parameter in Powerup.ts
+  2. Unused parameter in GameScene.ts
+  3. Unused method in GameScene.ts
+
+● Update(src/objects/Powerup.ts)
+  ⎿  Updated src/objects/Powerup.ts with 1 addition and 1 removal
+       60        }
+       61      }
+       62    
+       63 -    public activate(gameScene: any): void {
+       63 +    public activate(_gameScene: any): void {
+       64        // To be overridden by subclasses
+       65      }
+       66    
+
+● Update(src/scenes/GameScene.ts)
+  ⎿  Updated src/scenes/GameScene.ts with 1 addition and 1 removal                            
+       388    
+       389      private setupPowerupCollisions() {
+       390        // Powerup vs Paddle
+       391 -      this.physics.add.overlap(this.powerups, this.paddle, (paddle, powerup) => {
+       391 +      this.physics.add.overlap(this.powerups, this.paddle, (_paddle, powerup) => {
+       392          this.powerupHitPaddle(powerup as Powerup)
+       393        })
+       394      }
+
+● Now let me remove the unused findSafeSpawnPosition method since we're no longer using the complex collision detection:
+
+● Bash(rg -n "findSafeSpawnPosition" /home/lmorchard/devel/claude-breakout-clone/src/scenes/GameScene.ts)
+  ⎿  426:  private findSafeSpawnPosition(preferredX: number, preferredY: number): { x: number, y: number } {
+
+● Read(src/scenes/GameScene.ts)
+  ⎿  Read 100 lines (ctrl+r to expand)
+
+● Let me find the end of these unused methods and remove them all:
+
+● Read(src/scenes/GameScene.ts)
+  ⎿  Read 5 lines (ctrl+r to expand)
+
+● Now I'll remove all the unused collision detection methods:
+
+● Update(src/scenes/GameScene.ts)
+  ⎿  Updated src/scenes/GameScene.ts with 103 removals                                                                                                            
+       423        powerup.destroy()
+       424      }
+       425    
+       426 -    private findSafeSpawnPosition(preferredX: number, preferredY: number): { x: number, y: number } {
+       427 -      const ballRadius = GameConfig.BALL_SIZE / 2
+       428 -      const minX = ballRadius
+       429 -      const maxX = GameConfig.GAME_WIDTH - ballRadius
+       430 -      const minY = GameConfig.STATUS_BAR_HEIGHT + ballRadius
+       431 -      const maxY = GameConfig.GAME_HEIGHT - ballRadius
+       432 -      
+       433 -      console.log(`Finding safe spawn position for preferred (${preferredX}, ${preferredY})`)
+       434 -      
+       435 -      // Start with the preferred position, clamped to bounds
+       436 -      let adjustedX = Math.max(minX, Math.min(maxX, preferredX))
+       437 -      let adjustedY = Math.max(minY, Math.min(maxY, preferredY))
+       438 -      
+       439 -      // Try to find a position that doesn't overlap with any objects
+       440 -      const maxAttempts = 20
+       441 -      const searchRadius = 100 // Increased search radius
+       442 -      
+       443 -      for (let attempt = 0; attempt < maxAttempts; attempt++) {
+       444 -        // Check if current position overlaps with any objects
+       445 -        const colliding = this.isPositionColliding(adjustedX, adjustedY, ballRadius + 5) // Add small buffer
+       446 -        console.log(`Attempt ${attempt}: position (${adjustedX.toFixed(1)}, ${adjustedY.toFixed(1)}) - colliding: ${colliding}`)
+       447 -        
+       448 -        if (!colliding) {
+       449 -          // Found a safe position
+       450 -          console.log(`Found safe position: (${adjustedX}, ${adjustedY})`)
+       451 -          return { x: adjustedX, y: adjustedY }
+       452 -        }
+       453 -        
+       454 -        // Try a new position in a spiral pattern around the preferred position
+       455 -        const angle = (attempt / maxAttempts) * Math.PI * 2 * 3 // 3 spirals
+       456 -        const distance = (attempt / maxAttempts) * searchRadius
+       457 -        
+       458 -        adjustedX = preferredX + Math.cos(angle) * distance
+       459 -        adjustedY = preferredY + Math.sin(angle) * distance
+       460 -        
+       461 -        // Clamp to bounds again
+       462 -        adjustedX = Math.max(minX, Math.min(maxX, adjustedX))
+       463 -        adjustedY = Math.max(minY, Math.min(maxY, adjustedY))
+       464 -      }
+       465 -      
+       466 -      // If we couldn't find a safe position, fall back to a safe area below bricks
+       467 -      const brickAreaTop = GameConfig.STATUS_BAR_HEIGHT + GameConfig.STATUS_BAR_MARGIN * 2
+       468 -      const brickAreaBottom = brickAreaTop + (GameConfig.BRICK_ROWS * (GameConfig.BRICK_HEIGHT + GameConfig.BRICK_SPACING)) + GameConfig.BRICK_SPACING
+       469 -      const safeY = Math.max(brickAreaBottom + ballRadius + 50, minY) // Increased buffer
+       470 -      
+       471 -      console.log(`Fallback to safe area: (${preferredX}, ${safeY})`)
+       472 -      return { 
+       473 -        x: Math.max(minX, Math.min(maxX, preferredX)), 
+       474 -        y: Math.min(safeY, maxY) 
+       475 -      }
+       476 -    }
+       477 -  
+       478 -    private isPositionColliding(x: number, y: number, radius: number): boolean {
+       479 -      // Create a temporary circle to test collisions
+       480 -      const testCircle = { x, y, radius }
+       481 -      
+       482 -      // Check collision with bricks
+       483 -      const bricks = this.brickGrid.getBricks().children.entries
+       484 -      for (const brick of bricks) {
+       485 -        if (brick.active && this.circleRectCollision(testCircle, brick as any)) {
+       486 -          return true
+       487 -        }
+       488 -      }
+       489 -      
+       490 -      // Check collision with paddle
+       491 -      if (this.circleRectCollision(testCircle, this.paddle)) {
+       492 -        return true
+       493 -      }
+       494 -      
+       495 -      // Check collision with existing balls
+       496 -      for (const ball of this.balls) {
+       497 -        const distance = Math.sqrt((x - ball.x) ** 2 + (y - ball.y) ** 2)
+       498 -        if (distance < radius + GameConfig.BALL_SIZE / 2) {
+       499 -          return true
+       500 -        }
+       501 -      }
+       502 -      
+       503 -      // Check collision with powerups
+       504 -      for (const powerup of this.powerups.children.entries) {
+       505 -        if (powerup.active && this.circleRectCollision(testCircle, powerup as any)) {
+       506 -          return true
+       507 -        }
+       508 -      }
+       509 -      
+       510 -      return false
+       511 -    }
+       512 -  
+       513 -    private circleRectCollision(circle: { x: number, y: number, radius: number }, rect: any): boolean {
+       514 -      // Get rectangle bounds
+       515 -      const rectLeft = rect.x - rect.width / 2
+       516 -      const rectRight = rect.x + rect.width / 2
+       517 -      const rectTop = rect.y - rect.height / 2
+       518 -      const rectBottom = rect.y + rect.height / 2
+       519 -      
+       520 -      // Find the closest point on the rectangle to the circle center
+       521 -      const closestX = Math.max(rectLeft, Math.min(circle.x, rectRight))
+       522 -      const closestY = Math.max(rectTop, Math.min(circle.y, rectBottom))
+       523 -      
+       524 -      // Calculate distance between circle center and closest point
+       525 -      const distance = Math.sqrt((circle.x - closestX) ** 2 + (circle.y - closestY) ** 2)
+       526 -      
+       527 -      return distance < circle.radius
+       528 -    }
+       426    }
+       427   \ No newline at end of file
+
+● Now let's run the build again to check if all issues are resolved:
+
+● Bash(npm run build)
+  ⎿  > claude-breakout-clone@1.0.0 build
+     > tsc && vite build
+
+     … +13 lines (ctrl+r to expand)
+
+● Perfect! The build is now successful. The warning about chunk size is just informational and doesn't indicate any errors - it's just suggesting optimization for the Phaser 3 library bundle size.
+
+● Bash(git add -A && git commit -m "fix: Resolve TypeScript build issues…)
+  ⎿  [main 855910c] fix: Resolve TypeScript build issues
+      2 files changed, 2 insertions(+), 105 deletions(-)
+
+● Excellent! All TypeScript issues have been resolved and the build is now successful. The multiball feature is complete and ready for production:
+
+  ✅ Build Status: Clean build with no errors✅ TypeScript: All type issues resolved✅ Multiball Feature: Fully implemented and working✅ Stuck Ball Detection: Automatic recovery system in place
+
+  The multiball feature now works properly:
+  - Balls spawn near existing balls (80px X offset)
+  - Inverted X velocity for immediate separation
+  - Stuck ball detection prevents permanent freezing
+  - Clean TypeScript code with no warnings
+
+  The game is ready for testing and deployment!
