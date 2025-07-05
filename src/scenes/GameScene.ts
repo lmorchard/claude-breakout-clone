@@ -294,7 +294,24 @@ export class GameScene extends Phaser.Scene {
   }
 
   public addBall(x: number, y: number, velocityX: number, velocityY: number): Ball {
-    const newBall = new Ball(this, x, y)
+    // Ensure spawn position is within bounds
+    let adjustedX = x
+    let adjustedY = y
+    
+    const ballRadius = GameConfig.BALL_SIZE / 2
+    const minX = ballRadius
+    const maxX = GameConfig.GAME_WIDTH - ballRadius
+    const minY = GameConfig.STATUS_BAR_HEIGHT + ballRadius
+    const maxY = GameConfig.GAME_HEIGHT - ballRadius
+    
+    // Clamp position to valid bounds
+    adjustedX = Math.max(minX, Math.min(maxX, adjustedX))
+    adjustedY = Math.max(minY, Math.min(maxY, adjustedY))
+    
+    // Add small random Y offset to prevent perfect overlaps
+    adjustedY += (Math.random() - 0.5) * 10
+    
+    const newBall = new Ball(this, adjustedX, adjustedY)
     this.balls.push(newBall)
     this.setupBallCollisions(newBall)
     

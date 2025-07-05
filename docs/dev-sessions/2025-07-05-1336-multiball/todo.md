@@ -17,8 +17,8 @@
 - [x] Integrate powerup spawning with brick destruction
 
 ## Phase 5: Multiball Behavior
-- [ ] Implement multiball powerup activation logic
-- [ ] Polish ball spawning positions and edge cases
+- [x] Implement multiball powerup activation logic
+- [x] Polish ball spawning positions and edge cases
 
 ## Phase 6: Testing & Polish
 - [ ] Add debug helpers for testing
