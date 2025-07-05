@@ -1,14 +1,14 @@
 # Session Todo: Initial Setup
 
 ## Phase 1: Project Foundation
-- [ ] Initialize Vite + TypeScript project with Phaser
-- [ ] Create project structure (/src, /src/scenes, /src/objects, etc.)
-- [ ] Configure development environment and test Vite dev server
+- [x] Initialize Vite + TypeScript project with Phaser  
+- [x] Create project structure (/src, /src/scenes, /src/objects, etc.)
+- [x] Configure development environment and test Vite dev server
 
 ## Phase 2: Core Game Architecture  
-- [ ] Create configuration system with GameConfig object
-- [ ] Implement responsive scaling system (768x1024 internal resolution)
-- [ ] Set up basic Phaser scenes (StartScene, GameScene, GameOverScene)
+- [x] Create configuration system with GameConfig object
+- [x] Implement responsive scaling system (768x1024 internal resolution)
+- [x] Set up basic Phaser scenes (StartScene, GameScene, GameOverScene)
 
 ## Phase 3: Core Game Objects
 - [ ] Create Ball class with physics and movement
