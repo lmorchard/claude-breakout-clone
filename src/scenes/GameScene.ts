@@ -13,7 +13,7 @@ export class GameScene extends Phaser.Scene {
   private isPaused: boolean = false
 
   // Game objects
-  private ball!: Ball
+  private balls: Ball[] = []
   private paddle!: Paddle
   private brickGrid!: BrickGrid
   private isWaitingToStart: boolean = false
@@ -71,11 +71,15 @@ export class GameScene extends Phaser.Scene {
     // Create paddle
     this.paddle = new Paddle(this)
     
-    // Create ball
-    this.ball = new Ball(this, GameConfig.GAME_WIDTH / 2, GameConfig.GAME_HEIGHT / 2)
+    // Create initial ball
+    const initialBall = new Ball(this, GameConfig.GAME_WIDTH / 2, GameConfig.GAME_HEIGHT / 2)
+    this.balls = [initialBall]
     
     // Create brick grid
     this.brickGrid = new BrickGrid(this)
+    
+    // Setup collisions for initial ball
+    this.balls.forEach(ball => this.setupBallCollisions(ball))
   }
 
   private createBoundaries() {
@@ -118,15 +122,19 @@ export class GameScene extends Phaser.Scene {
   }
 
   private setupCollisions() {
+    // Will be called for each ball
+  }
+
+  private setupBallCollisions(ball: Ball) {
     // Ball vs Paddle
-    this.physics.add.collider(this.ball, this.paddle, () => {
-      this.ball.bounceOffPaddle(this.paddle)
+    this.physics.add.collider(ball, this.paddle, () => {
+      ball.bounceOffPaddle(this.paddle)
     })
 
     // Ball vs Bricks
-    this.physics.add.collider(this.ball, this.brickGrid.getBricks(), (_ball, brick) => {
+    this.physics.add.collider(ball, this.brickGrid.getBricks(), (_ball, brick) => {
       // Determine collision side (simplified)
-      this.ball.bounceOffBrick('top')
+      ball.bounceOffBrick('top')
       
       // Destroy brick and award points
       const points = this.brickGrid.destroyBrick(brick as any)
@@ -137,15 +145,30 @@ export class GameScene extends Phaser.Scene {
         this.scene.start('GameOverScene', { score: this.score, won: true })
       }
     })
+    
+    // Ball vs other balls
+    this.balls.forEach(otherBall => {
+      if (otherBall !== ball) {
+        this.physics.add.collider(ball, otherBall, () => {
+          this.ballHitBall(ball, otherBall)
+        })
+      }
+    })
   }
 
   private showReadyPrompt() {
     this.isWaitingToStart = true
-    this.ball.setPosition(GameConfig.GAME_WIDTH / 2, GameConfig.GAME_HEIGHT / 2)
+    
+    // Reset to single ball at center
+    this.balls.forEach(ball => ball.destroy())
+    this.balls = []
+    const newBall = new Ball(this, GameConfig.GAME_WIDTH / 2, GameConfig.GAME_HEIGHT / 2)
+    this.balls.push(newBall)
+    this.setupBallCollisions(newBall)
     
     // Stop ball movement
-    if (this.ball.body) {
-      const body = this.ball.body as Phaser.Physics.Arcade.Body
+    if (newBall.body) {
+      const body = newBall.body as Phaser.Physics.Arcade.Body
       body.setVelocity(0, 0)
     }
 
@@ -168,17 +191,38 @@ export class GameScene extends Phaser.Scene {
       this.readyText.destroy()
       this.readyText = undefined
     }
-    this.ball.resetBall()
+    // Reset the first ball
+    if (this.balls[0]) {
+      this.balls[0].resetBall()
+    }
   }
 
   update() {
     if (this.isPaused || this.isWaitingToStart) return
 
-    // Update ball
-    this.ball.update()
-
-    // Check if ball fell off bottom
-    if (this.ball.checkBottomBoundary()) {
+    // Update all balls
+    const ballsToRemove: Ball[] = []
+    
+    this.balls.forEach(ball => {
+      ball.update()
+      
+      // Check if ball fell off bottom
+      if (ball.checkBottomBoundary()) {
+        ballsToRemove.push(ball)
+      }
+    })
+    
+    // Remove balls that went out of bounds
+    ballsToRemove.forEach(ball => {
+      const index = this.balls.indexOf(ball)
+      if (index > -1) {
+        this.balls.splice(index, 1)
+        ball.destroy()
+      }
+    })
+    
+    // Check if all balls are gone
+    if (this.balls.length === 0) {
       this.loseLife()
     }
   }
@@ -222,5 +266,55 @@ export class GameScene extends Phaser.Scene {
       // Show ready prompt for next life
       this.showReadyPrompt()
     }
+  }
+
+  public addBall(x: number, y: number, velocityX: number, velocityY: number): Ball {
+    const newBall = new Ball(this, x, y)
+    this.balls.push(newBall)
+    this.setupBallCollisions(newBall)
+    
+    // Setup collisions with existing balls
+    this.balls.forEach(existingBall => {
+      if (existingBall !== newBall) {
+        this.physics.add.collider(existingBall, newBall, () => {
+          this.ballHitBall(existingBall, newBall)
+        })
+      }
+    })
+    
+    // Set velocity after ball is created
+    if (newBall.body) {
+      const body = newBall.body as Phaser.Physics.Arcade.Body
+      body.setVelocity(velocityX, velocityY)
+    }
+    
+    return newBall
+  }
+
+  public removeBall(ball: Ball) {
+    const index = this.balls.indexOf(ball)
+    if (index > -1) {
+      this.balls.splice(index, 1)
+      ball.destroy()
+    }
+  }
+
+  public getBallCount(): number {
+    return this.balls.length
+  }
+
+  private ballHitBall(ball1: Ball, ball2: Ball) {
+    // Get velocities
+    const body1 = ball1.body as Phaser.Physics.Arcade.Body
+    const body2 = ball2.body as Phaser.Physics.Arcade.Body
+    
+    // Simple elastic collision - swap velocities
+    const v1x = body1.velocity.x
+    const v1y = body1.velocity.y
+    const v2x = body2.velocity.x
+    const v2y = body2.velocity.y
+    
+    body1.setVelocity(v2x, v2y)
+    body2.setVelocity(v1x, v1y)
   }
 }

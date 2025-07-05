@@ -4,9 +4,9 @@
 - [x] Add powerup configuration properties to GameConfig.ts
 
 ## Phase 2: Multiple Ball Support  
-- [ ] Convert single ball to ball array in GameScene
-- [ ] Add ball lifecycle management (addBall, removeBall)
-- [ ] Implement ball-to-ball collision physics
+- [x] Convert single ball to ball array in GameScene
+- [x] Add ball lifecycle management (addBall, removeBall)
+- [x] Implement ball-to-ball collision physics
 
 ## Phase 3: Powerup System Infrastructure
 - [ ] Create base Powerup class
