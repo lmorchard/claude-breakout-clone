@@ -16,9 +16,20 @@ This is a functional Breakout clone game built with Phaser 3, TypeScript, and Vi
 
 ## Development Sessions
 
-This project uses organized development sessions documented in `docs/dev-sessions/` directories. Each session follows the pattern:
-- `docs/dev-sessions/YYYY-MM-DD-HHMM-{slug}/`
-- Contains: `spec.md`, `plan.md`, `todo.md`, `notes.md`
+We want to organize thoughts around discrete development sessions.
+
+Each development sessions may be aimed at building a specific complete feature - or just a part of a feature built in phases.
+
+Documentation and artifacts for a session should live in a directory of the current project called `docs/dev-sessions/$(date +"%Y-%m-%d-%H%M")-{slug}` where `$(date +"%Y-%m-%d-%H%M")` is a bash command and `{slug}` is a short description of the session. If possible, derive the slug from the name of the current git branch, otherwise ask me to provide a short description.
+
+In this directory will live at least the following files:
+
+- `spec.md` - the spec for the session
+- `plan.md` - the plan for the session
+- `todo.md` - the todo list for the session
+- `notes.md` - the notes for the session, including a final summary of the session before committing to git
+
+Other files may live in this directory as appropriate to the session. 
 
 When starting a new development session, create the appropriate session directory structure and documentation files.
 
