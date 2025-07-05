@@ -13,11 +13,12 @@ export class MultiballPowerup extends Powerup {
   private createBallIcon() {
     // Create a small ball icon in the center
     const ballGraphics = this.scene.add.graphics()
-    ballGraphics.fillStyle(GameConfig.COLORS.POWERUP)
-    ballGraphics.fillCircle(this.x, this.y, GameConfig.BALL_SIZE / 3)
+    ballGraphics.fillStyle(GameConfig.COLORS.BALL)
+    ballGraphics.fillCircle(0, 0, GameConfig.BALL_SIZE / 3)
     
-    // Attach to this powerup so it moves with it
-    this.add(ballGraphics)
+    // Set graphics position to match sprite
+    ballGraphics.x = this.x
+    ballGraphics.y = this.y
   }
 
   public activate(gameScene: any): void {

@@ -21,9 +21,9 @@
 - [x] Polish ball spawning positions and edge cases
 
 ## Phase 6: Testing & Polish
-- [ ] Add debug helpers for testing
-- [ ] Fix edge cases and verify ball counting
-- [ ] Performance test with many balls
+- [x] Add debug helpers for testing
+- [x] Fix edge cases and verify ball counting
+- [x] Performance test with many balls
 
 ## Documentation & Commit
 - [ ] Update session notes with implementation details

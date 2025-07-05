@@ -11,6 +11,7 @@ export class GameScene extends Phaser.Scene {
   private lives: number = GameConfig.INITIAL_LIVES
   private scoreText!: Phaser.GameObjects.Text
   private livesText!: Phaser.GameObjects.Text
+  private ballCountText!: Phaser.GameObjects.Text
   private pauseButton!: Phaser.GameObjects.Text
   private isPaused: boolean = false
 
@@ -54,6 +55,13 @@ export class GameScene extends Phaser.Scene {
     this.livesText = this.add.text(GameConfig.GAME_WIDTH / 2, margin, `Lives: ${this.lives}`, {
       fontSize: '20px',
       color: '#ffffff',
+      fontFamily: 'Arial, sans-serif'
+    }).setOrigin(0.5, 0)
+
+    // Ball count (for debugging)
+    this.ballCountText = this.add.text(GameConfig.GAME_WIDTH / 2, margin + 25, `Balls: ${this.getBallCount()}`, {
+      fontSize: '16px',
+      color: '#888888',
       fontFamily: 'Arial, sans-serif'
     }).setOrigin(0.5, 0)
 
@@ -127,6 +135,16 @@ export class GameScene extends Phaser.Scene {
     // ESC key for pause
     this.input.keyboard!.on('keydown-ESC', () => {
       this.togglePause()
+    })
+    
+    // Debug key 'M' to spawn multiball powerup
+    this.input.keyboard!.on('keydown-M', () => {
+      if (!this.isPaused && !this.isWaitingToStart) {
+        const centerX = GameConfig.GAME_WIDTH / 2
+        const centerY = GameConfig.GAME_HEIGHT / 2
+        this.spawnPowerup(centerX, centerY, 'multiball')
+        console.log('Debug: Spawned multiball powerup at center')
+      }
     })
   }
 
@@ -250,6 +268,9 @@ export class GameScene extends Phaser.Scene {
         powerup.update()
       }
     })
+    
+    // Update ball count display
+    this.ballCountText.setText(`Balls: ${this.getBallCount()}`)
   }
 
   private togglePause() {

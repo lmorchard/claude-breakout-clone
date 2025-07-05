@@ -31,18 +31,19 @@ export class Powerup extends Phaser.Physics.Arcade.Sprite {
     const graphics = this.scene.add.graphics()
     graphics.fillStyle(GameConfig.COLORS.POWERUP)
     
-    // Draw rounded rectangle
+    // Draw rounded rectangle (relative to sprite center)
     const radius = 5
     graphics.fillRoundedRect(
-      this.x - GameConfig.BRICK_WIDTH / 2,
-      this.y - GameConfig.BRICK_HEIGHT / 2,
+      -GameConfig.BRICK_WIDTH / 2,
+      -GameConfig.BRICK_HEIGHT / 2,
       GameConfig.BRICK_WIDTH,
       GameConfig.BRICK_HEIGHT,
       radius
     )
     
-    // Attach graphics to this sprite so it moves with it
-    this.add(graphics)
+    // Set graphics position to match sprite
+    graphics.x = this.x
+    graphics.y = this.y
   }
 
   public activate(gameScene: any): void {
