@@ -315,28 +315,18 @@ export class GameScene extends Phaser.Scene {
   }
 
   public addBall(x: number, y: number, velocityX: number, velocityY: number): Ball {
-    // Use the original intended positions but with basic bounds checking
+    // Simple bounds checking only - spawn where intended
     const ballRadius = GameConfig.BALL_SIZE / 2
     const minX = ballRadius
     const maxX = GameConfig.GAME_WIDTH - ballRadius
     const minY = GameConfig.STATUS_BAR_HEIGHT + ballRadius
     const maxY = GameConfig.GAME_HEIGHT - ballRadius
     
-    // Clamp to bounds
-    let adjustedX = Math.max(minX, Math.min(maxX, x))
-    let adjustedY = Math.max(minY, Math.min(maxY, y))
+    // Clamp to game bounds only
+    const adjustedX = Math.max(minX, Math.min(maxX, x))
+    const adjustedY = Math.max(minY, Math.min(maxY, y))
     
-    // Only avoid brick area if we're spawning in it
-    const brickAreaTop = GameConfig.STATUS_BAR_HEIGHT + GameConfig.STATUS_BAR_MARGIN * 2
-    const brickAreaBottom = brickAreaTop + (GameConfig.BRICK_ROWS * (GameConfig.BRICK_HEIGHT + GameConfig.BRICK_SPACING)) + GameConfig.BRICK_SPACING
-    
-    if (adjustedY >= brickAreaTop && adjustedY <= brickAreaBottom) {
-      // Move slightly below brick area
-      adjustedY = brickAreaBottom + ballRadius + 20
-      adjustedY = Math.min(adjustedY, maxY) // Don't go off screen
-    }
-    
-    // Ensure velocities are reasonable
+    // Ensure velocities are reasonable (prevent zero velocity)
     let finalVelX = velocityX
     let finalVelY = velocityY
     
@@ -346,8 +336,6 @@ export class GameScene extends Phaser.Scene {
     if (Math.abs(finalVelY) < 50) {
       finalVelY = finalVelY >= 0 ? 100 : -100
     }
-    
-    console.log(`Spawning ball at: (${adjustedX}, ${adjustedY}) from intended (${x}, ${y}) with velocity (${finalVelX}, ${finalVelY})`)
     
     const newBall = new Ball(this, adjustedX, adjustedY)
     this.balls.push(newBall)
