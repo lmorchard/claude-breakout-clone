@@ -24,8 +24,8 @@ export class Ball extends Phaser.Physics.Arcade.Sprite {
       // Don't use world bounds collision - we'll handle it manually
       body.setCollideWorldBounds(false)
       
-      // Set initial velocity
-      this.resetBall()
+      // Note: Don't call resetBall() here as it moves ball to center
+      // Initial velocity will be set by the calling code
     }
   }
 
