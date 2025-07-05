@@ -3,6 +3,8 @@ import { GameConfig } from '../config/GameConfig'
 import { Ball } from '../objects/Ball'
 import { Paddle } from '../objects/Paddle'
 import { BrickGrid } from '../objects/Brick'
+import { Powerup } from '../objects/Powerup'
+import { MultiballPowerup } from '../objects/MultiballPowerup'
 
 export class GameScene extends Phaser.Scene {
   private score: number = 0
@@ -16,6 +18,7 @@ export class GameScene extends Phaser.Scene {
   private balls: Ball[] = []
   private paddle!: Paddle
   private brickGrid!: BrickGrid
+  private powerups!: Phaser.Physics.Arcade.Group
   private isWaitingToStart: boolean = false
   private readyText?: Phaser.GameObjects.Text
 
@@ -78,8 +81,14 @@ export class GameScene extends Phaser.Scene {
     // Create brick grid
     this.brickGrid = new BrickGrid(this)
     
+    // Create powerups group
+    this.powerups = this.physics.add.group()
+    
     // Setup collisions for initial ball
     this.balls.forEach(ball => this.setupBallCollisions(ball))
+    
+    // Setup powerup collisions
+    this.setupPowerupCollisions()
   }
 
   private createBoundaries() {
@@ -225,6 +234,13 @@ export class GameScene extends Phaser.Scene {
     if (this.balls.length === 0) {
       this.loseLife()
     }
+    
+    // Update powerups
+    this.powerups.children.entries.forEach(powerup => {
+      if (powerup instanceof Powerup) {
+        powerup.update()
+      }
+    })
   }
 
   private togglePause() {
@@ -316,5 +332,40 @@ export class GameScene extends Phaser.Scene {
     
     body1.setVelocity(v2x, v2y)
     body2.setVelocity(v1x, v1y)
+  }
+
+  private setupPowerupCollisions() {
+    // Powerup vs Paddle
+    this.physics.add.overlap(this.powerups, this.paddle, (paddle, powerup) => {
+      this.powerupHitPaddle(powerup as Powerup)
+    })
+  }
+
+  public spawnPowerup(x: number, y: number, type: string): Powerup | null {
+    let powerup: Powerup | null = null
+    
+    switch (type) {
+      case 'multiball':
+        powerup = new MultiballPowerup(this, x, y)
+        break
+      default:
+        console.warn(`Unknown powerup type: ${type}`)
+        return null
+    }
+    
+    if (powerup) {
+      this.powerups.add(powerup)
+    }
+    
+    return powerup
+  }
+
+  private powerupHitPaddle(powerup: Powerup) {
+    // Activate the powerup
+    powerup.activate(this)
+    
+    // Remove the powerup
+    this.powerups.remove(powerup)
+    powerup.destroy()
   }
 }

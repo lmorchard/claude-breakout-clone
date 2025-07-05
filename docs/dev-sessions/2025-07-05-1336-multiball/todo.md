@@ -9,9 +9,9 @@
 - [x] Implement ball-to-ball collision physics
 
 ## Phase 3: Powerup System Infrastructure
-- [ ] Create base Powerup class
-- [ ] Create MultiballPowerup subclass
-- [ ] Add powerup management to GameScene
+- [x] Create base Powerup class
+- [x] Create MultiballPowerup subclass
+- [x] Add powerup management to GameScene
 
 ## Phase 4: Powerup Spawning
 - [ ] Integrate powerup spawning with brick destruction
