@@ -110,35 +110,48 @@ export class Ball extends Phaser.Physics.Arcade.Sprite {
     
     const body = this.body as Phaser.Physics.Arcade.Body
     const radius = GameConfig.BALL_SIZE / 2
-    
-    // Manual boundary checking for top and sides (but not bottom)
     let velocityX = body.velocity.x
     let velocityY = body.velocity.y
+    let velocityChanged = false
     
-    // Left and right boundaries
-    if (this.x - radius <= 0 || this.x + radius >= GameConfig.GAME_WIDTH) {
-      velocityX = -velocityX
-      // Keep ball within bounds
-      if (this.x - radius <= 0) this.setX(radius)
-      if (this.x + radius >= GameConfig.GAME_WIDTH) this.setX(GameConfig.GAME_WIDTH - radius)
+    // Left boundary - only bounce if moving left
+    if (this.x - radius <= 0 && velocityX < 0) {
+      velocityX = Math.abs(velocityX)
+      this.setX(radius + 1) // Add small buffer
+      velocityChanged = true
     }
     
-    // Top boundary only
-    if (this.y - radius <= 0) {
-      velocityY = -velocityY
-      this.setY(radius)
+    // Right boundary - only bounce if moving right  
+    if (this.x + radius >= GameConfig.GAME_WIDTH && velocityX > 0) {
+      velocityX = -Math.abs(velocityX)
+      this.setX(GameConfig.GAME_WIDTH - radius - 1) // Add small buffer
+      velocityChanged = true
+    }
+    
+    // Top boundary - only bounce if moving up
+    if (this.y - radius <= 0 && velocityY < 0) {
+      velocityY = Math.abs(velocityY)
+      this.setY(radius + 1) // Add small buffer
+      velocityChanged = true
     }
     
     // Update velocity if it changed
-    if (velocityX !== body.velocity.x || velocityY !== body.velocity.y) {
+    if (velocityChanged) {
+      // Ensure the velocity maintains the correct speed
+      const currentSpeed = Math.sqrt(velocityX ** 2 + velocityY ** 2)
+      if (currentSpeed > 0) {
+        const ratio = GameConfig.BALL_SPEED / currentSpeed
+        velocityX *= ratio
+        velocityY *= ratio
+      }
       body.setVelocity(velocityX, velocityY)
     }
     
-    // Ensure ball maintains consistent speed
-    const currentSpeed = Math.sqrt(velocityX ** 2 + velocityY ** 2)
-    if (currentSpeed > 0 && Math.abs(currentSpeed - GameConfig.BALL_SPEED) > 10) {
-      const ratio = GameConfig.BALL_SPEED / currentSpeed
-      body.setVelocity(velocityX * ratio, velocityY * ratio)
+    // Fallback speed check (less frequent)
+    const finalSpeed = Math.sqrt(body.velocity.x ** 2 + body.velocity.y ** 2)
+    if (finalSpeed > 0 && Math.abs(finalSpeed - GameConfig.BALL_SPEED) > 20) {
+      const ratio = GameConfig.BALL_SPEED / finalSpeed
+      body.setVelocity(body.velocity.x * ratio, body.velocity.y * ratio)
     }
   }
 }
