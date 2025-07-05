@@ -34,6 +34,7 @@ export const GameConfig = {
     PADDLE: 0xffffff,
     BRICK: 0xff6b6b,
     TEXT: 0xffffff,
-    UI_BACKGROUND: 0x333333
+    UI_BACKGROUND: 0x333333,
+    BOUNDARY: 0x666666
   }
 } as const

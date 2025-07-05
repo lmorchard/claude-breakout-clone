@@ -65,6 +65,9 @@ export class GameScene extends Phaser.Scene {
   }
 
   private createGameObjects() {
+    // Create visible boundaries
+    this.createBoundaries()
+    
     // Create paddle
     this.paddle = new Paddle(this)
     
@@ -73,6 +76,38 @@ export class GameScene extends Phaser.Scene {
     
     // Create brick grid
     this.brickGrid = new BrickGrid(this)
+  }
+
+  private createBoundaries() {
+    const boundaryColor = GameConfig.COLORS.BOUNDARY
+    const boundaryThickness = 2
+
+    // Top boundary
+    this.add.rectangle(
+      GameConfig.GAME_WIDTH / 2, 
+      boundaryThickness / 2, 
+      GameConfig.GAME_WIDTH, 
+      boundaryThickness, 
+      boundaryColor
+    )
+
+    // Left boundary
+    this.add.rectangle(
+      boundaryThickness / 2, 
+      GameConfig.GAME_HEIGHT / 2, 
+      boundaryThickness, 
+      GameConfig.GAME_HEIGHT, 
+      boundaryColor
+    )
+
+    // Right boundary
+    this.add.rectangle(
+      GameConfig.GAME_WIDTH - boundaryThickness / 2, 
+      GameConfig.GAME_HEIGHT / 2, 
+      boundaryThickness, 
+      GameConfig.GAME_HEIGHT, 
+      boundaryColor
+    )
   }
 
   private setupInput() {
