@@ -20,7 +20,9 @@ export class Ball extends Phaser.Physics.Arcade.Sprite {
       const body = this.body as Phaser.Physics.Arcade.Body
       body.setCircle(GameConfig.BALL_SIZE / 2)
       body.setBounce(1, 1)
-      body.setCollideWorldBounds(true, 0, 0, true)
+      
+      // Allow bouncing on top, left, and right walls, but not bottom
+      body.setCollideWorldBounds(true, 1, 1, false)
       
       // Set initial velocity
       this.resetBall()
