@@ -47,17 +47,21 @@ export class MultiballPowerup extends Powerup {
   }
 
   public activate(gameScene: any): void {
-    // Get current balls from the game scene
-    const currentBalls = gameScene.balls || []
+    // Get current balls from the game scene (create a snapshot to avoid modifying array while iterating)
+    const currentBalls = [...(gameScene.balls || [])]
+    
+    console.log(`Multiball activating with ${currentBalls.length} existing balls`)
     
     // For each existing ball, spawn a new ball nearby with inverted X velocity
-    currentBalls.forEach((ball: any) => {
+    currentBalls.forEach((ball: any, index: number) => {
       if (ball.body) {
         const body = ball.body
         const currentX = ball.x
         const currentY = ball.y
         const currentVelocityX = body.velocity.x
         const currentVelocityY = body.velocity.y
+        
+        console.log(`Ball ${index}: pos(${currentX}, ${currentY}), vel(${currentVelocityX}, ${currentVelocityY})`)
         
         // Calculate new position with offset
         const newX = currentX + GameConfig.BALL_SPAWN_OFFSET
@@ -66,6 +70,8 @@ export class MultiballPowerup extends Powerup {
         // Invert X velocity, keep Y velocity the same
         const newVelocityX = -currentVelocityX
         const newVelocityY = currentVelocityY
+        
+        console.log(`Spawning new ball at: pos(${newX}, ${newY}), vel(${newVelocityX}, ${newVelocityY})`)
         
         // Spawn the new ball
         gameScene.addBall(newX, newY, newVelocityX, newVelocityY)
