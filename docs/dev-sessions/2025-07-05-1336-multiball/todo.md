@@ -26,5 +26,5 @@
 - [x] Performance test with many balls
 
 ## Documentation & Commit
-- [ ] Update session notes with implementation details
-- [ ] Create git commit for multiball feature
+- [x] Update session notes with implementation details
+- [x] Create git commit for multiball feature
