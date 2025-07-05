@@ -26,7 +26,61 @@ Let's introduce a few new concepts:
   - For every ball currently in play, spawn another nearby and invert it's velocity in the X-axis
 
 ## Requirements
-TBD
+
+### Configuration Properties
+Add the following properties to `src/config/GameConfig.ts`:
+- `POWERUP_SPAWN_CHANCE: 0.1` (10% chance)
+- `POWERUP_FALL_SPEED: 100` (pixels per second)
+- `POWERUP_COLOR: 0x90EE90` (light green)
+- `BALL_SPAWN_OFFSET: 30` (pixels apart for new balls)
+
+### Powerup System
+- Powerups have a 10% chance to spawn when any brick is destroyed (regardless of cause)
+- Powerups spawn at the exact position where the destroyed brick was located
+- Powerups are brick-sized with rounded corners and contain a ball icon inside
+- Powerups fall at constant 100px/s speed (no gravity acceleration)
+- Powerups are removed when they reach the bottom of the screen
+- When powerup collides with paddle, it activates and is removed
+
+### Multiple Ball System
+- Game must support unlimited number of balls simultaneously
+- All balls behave identically: bounce off walls/paddle/bricks, destroy bricks
+- Ball-to-ball collisions use same bounce physics as other collisions
+- Maintain count of active balls in play
+- Player loses life only when the last ball exits the bottom of the screen
+- On life loss, game resets to single ball state
+
+### Multiball Powerup Behavior
+- When collected by paddle:
+  - For each existing ball in play, spawn a new ball nearby (30px offset)
+  - New ball maintains original Y-velocity but inverts X-velocity
+  - Balls immediately move apart to avoid collision
+- No persistent player state changes (effect is instantaneous)
+- Visual feedback deferred for future implementation
 
 ## Acceptance Criteria
-TBD
+
+### Core Functionality
+- [ ] Powerups spawn from destroyed bricks with 10% probability
+- [ ] Powerups fall at steady 100px/s and disappear at screen bottom
+- [ ] Powerups activate when touching paddle
+- [ ] Game supports multiple balls without limit
+- [ ] Ball count is accurately tracked
+- [ ] Life lost only when all balls are gone
+
+### Multiball Powerup
+- [ ] Multiball powerup appears as light green brick-sized rounded rectangle with ball icon
+- [ ] Collection doubles current ball count
+- [ ] New balls spawn 30px offset from originals
+- [ ] New balls have inverted X-velocity, same Y-velocity
+- [ ] Balls immediately separate without collision
+
+### Ball Physics
+- [ ] Ball-to-ball collisions behave like other collision types
+- [ ] Multiple balls interact correctly with paddle and bricks
+- [ ] All balls can destroy bricks and affect score
+
+### Game State
+- [ ] Game resets to single ball after life loss
+- [ ] Configuration properties are properly integrated
+- [ ] No lingering powerup state after life loss
