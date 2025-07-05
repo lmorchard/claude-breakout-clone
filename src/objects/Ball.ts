@@ -21,8 +21,8 @@ export class Ball extends Phaser.Physics.Arcade.Sprite {
       body.setCircle(GameConfig.BALL_SIZE / 2)
       body.setBounce(1, 1)
       
-      // Allow bouncing on top, left, and right walls, but not bottom
-      body.setCollideWorldBounds(true, 1, 1, false)
+      // Don't use world bounds collision - we'll handle it manually
+      body.setCollideWorldBounds(false)
       
       // Set initial velocity
       this.resetBall()
@@ -106,14 +106,39 @@ export class Ball extends Phaser.Physics.Arcade.Sprite {
   }
 
   update() {
+    if (!this.body) return
+    
+    const body = this.body as Phaser.Physics.Arcade.Body
+    const radius = GameConfig.BALL_SIZE / 2
+    
+    // Manual boundary checking for top and sides (but not bottom)
+    let velocityX = body.velocity.x
+    let velocityY = body.velocity.y
+    
+    // Left and right boundaries
+    if (this.x - radius <= 0 || this.x + radius >= GameConfig.GAME_WIDTH) {
+      velocityX = -velocityX
+      // Keep ball within bounds
+      if (this.x - radius <= 0) this.setX(radius)
+      if (this.x + radius >= GameConfig.GAME_WIDTH) this.setX(GameConfig.GAME_WIDTH - radius)
+    }
+    
+    // Top boundary only
+    if (this.y - radius <= 0) {
+      velocityY = -velocityY
+      this.setY(radius)
+    }
+    
+    // Update velocity if it changed
+    if (velocityX !== body.velocity.x || velocityY !== body.velocity.y) {
+      body.setVelocity(velocityX, velocityY)
+    }
+    
     // Ensure ball maintains consistent speed
-    if (this.body) {
-      const currentSpeed = Math.sqrt(this.body.velocity.x ** 2 + this.body.velocity.y ** 2)
-      if (currentSpeed > 0 && Math.abs(currentSpeed - GameConfig.BALL_SPEED) > 10) {
-        const ratio = GameConfig.BALL_SPEED / currentSpeed
-        const body = this.body as Phaser.Physics.Arcade.Body
-        body.setVelocity(body.velocity.x * ratio, body.velocity.y * ratio)
-      }
+    const currentSpeed = Math.sqrt(velocityX ** 2 + velocityY ** 2)
+    if (currentSpeed > 0 && Math.abs(currentSpeed - GameConfig.BALL_SPEED) > 10) {
+      const ratio = GameConfig.BALL_SPEED / currentSpeed
+      body.setVelocity(velocityX * ratio, velocityY * ratio)
     }
   }
 }
