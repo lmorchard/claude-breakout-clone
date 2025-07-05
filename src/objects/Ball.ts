@@ -85,20 +85,35 @@ export class Ball extends Phaser.Physics.Arcade.Sprite {
   public bounceOffBrick(side: 'top' | 'bottom' | 'left' | 'right') {
     if (!this.body) return
 
-    // Simple bounce physics based on collision side
+    const body = this.body as Phaser.Physics.Arcade.Body
+    let velocityX = body.velocity.x
+    let velocityY = body.velocity.y
+
+    // Bounce physics based on collision side
     switch (side) {
       case 'top':
       case 'bottom':
-        this.speedY = -this.speedY
+        velocityY = -velocityY
         break
       case 'left':
       case 'right':
-        this.speedX = -this.speedX
+        velocityX = -velocityX
         break
     }
     
-    const body = this.body as Phaser.Physics.Arcade.Body
-    body.setVelocity(this.speedX, this.speedY)
+    // Normalize to maintain consistent speed
+    const currentSpeed = Math.sqrt(velocityX ** 2 + velocityY ** 2)
+    if (currentSpeed > 0) {
+      const ratio = GameConfig.BALL_SPEED / currentSpeed
+      velocityX *= ratio
+      velocityY *= ratio
+    }
+    
+    body.setVelocity(velocityX, velocityY)
+    
+    // Update internal speed tracking
+    this.speedX = velocityX
+    this.speedY = velocityY
   }
 
   public checkBottomBoundary(): boolean {
