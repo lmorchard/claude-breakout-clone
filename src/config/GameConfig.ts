@@ -30,7 +30,7 @@ export const GameConfig = {
   // Powerup Properties
   POWERUP_SPAWN_CHANCE: 0.1, // 10% chance when brick destroyed
   POWERUP_FALL_SPEED: 100, // pixels per second downward
-  BALL_SPAWN_OFFSET: 30, // pixels between spawned balls
+  BALL_SPAWN_OFFSET: 80, // pixels between spawned balls
 
   // Colors
   COLORS: {

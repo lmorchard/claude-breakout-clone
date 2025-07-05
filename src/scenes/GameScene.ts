@@ -315,8 +315,6 @@ export class GameScene extends Phaser.Scene {
   }
 
   public addBall(x: number, y: number, velocityX: number, velocityY: number): Ball {
-    console.log(`addBall called with: x=${x}, y=${y}, vx=${velocityX}, vy=${velocityY}`)
-    
     // Ensure spawn position is within bounds
     let adjustedX = x
     let adjustedY = y
@@ -331,12 +329,8 @@ export class GameScene extends Phaser.Scene {
     adjustedX = Math.max(minX, Math.min(maxX, adjustedX))
     adjustedY = Math.max(minY, Math.min(maxY, adjustedY))
     
-    console.log(`Position adjusted from (${x}, ${y}) to (${adjustedX}, ${adjustedY})`)
-    
     // Add small random Y offset to prevent perfect overlaps
     adjustedY += (Math.random() - 0.5) * 10
-    
-    console.log(`Final position after random offset: (${adjustedX}, ${adjustedY})`)
     
     const newBall = new Ball(this, adjustedX, adjustedY)
     this.balls.push(newBall)
