@@ -1,11 +1,30 @@
 # Multiball Feature Todo List
 
-## Tasks
-TBD
+## Phase 1: Configuration Setup
+- [ ] Add powerup configuration properties to GameConfig.ts
 
-## Status
-- [ ] Session planning
-- [ ] Feature specification
-- [ ] Implementation
-- [ ] Testing
-- [ ] Documentation
+## Phase 2: Multiple Ball Support  
+- [ ] Convert single ball to ball array in GameScene
+- [ ] Add ball lifecycle management (addBall, removeBall)
+- [ ] Implement ball-to-ball collision physics
+
+## Phase 3: Powerup System Infrastructure
+- [ ] Create base Powerup class
+- [ ] Create MultiballPowerup subclass
+- [ ] Add powerup management to GameScene
+
+## Phase 4: Powerup Spawning
+- [ ] Integrate powerup spawning with brick destruction
+
+## Phase 5: Multiball Behavior
+- [ ] Implement multiball powerup activation logic
+- [ ] Polish ball spawning positions and edge cases
+
+## Phase 6: Testing & Polish
+- [ ] Add debug helpers for testing
+- [ ] Fix edge cases and verify ball counting
+- [ ] Performance test with many balls
+
+## Documentation & Commit
+- [ ] Update session notes with implementation details
+- [ ] Create git commit for multiball feature
