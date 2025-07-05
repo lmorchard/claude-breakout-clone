@@ -5,7 +5,7 @@ export const GameConfig = {
 
   // Ball Properties
   BALL_SIZE: 20,
-  BALL_SPEED: 250, // pixels per second
+  BALL_SPEED: 500, // pixels per second (doubled from 250)
 
   // Paddle Properties  
   PADDLE_WIDTH: 100,
