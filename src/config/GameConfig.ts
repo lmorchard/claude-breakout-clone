@@ -27,6 +27,11 @@ export const GameConfig = {
   INITIAL_LIVES: 3,
   READY_DELAY: 2000, // milliseconds
 
+  // Powerup Properties
+  POWERUP_SPAWN_CHANCE: 0.1, // 10% chance when brick destroyed
+  POWERUP_FALL_SPEED: 100, // pixels per second downward
+  BALL_SPAWN_OFFSET: 30, // pixels between spawned balls
+
   // Colors
   COLORS: {
     BACKGROUND: 0x000000,
@@ -35,6 +40,7 @@ export const GameConfig = {
     BRICK: 0xff6b6b,
     TEXT: 0xffffff,
     UI_BACKGROUND: 0x333333,
-    BOUNDARY: 0x666666
+    BOUNDARY: 0x666666,
+    POWERUP: 0x90EE90 // light green
   }
 } as const

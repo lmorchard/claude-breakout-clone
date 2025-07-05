@@ -1,7 +1,7 @@
 # Multiball Feature Todo List
 
 ## Phase 1: Configuration Setup
-- [ ] Add powerup configuration properties to GameConfig.ts
+- [x] Add powerup configuration properties to GameConfig.ts
 
 ## Phase 2: Multiple Ball Support  
 - [ ] Convert single ball to ball array in GameScene
