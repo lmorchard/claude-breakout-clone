@@ -329,8 +329,20 @@ export class GameScene extends Phaser.Scene {
     adjustedX = Math.max(minX, Math.min(maxX, adjustedX))
     adjustedY = Math.max(minY, Math.min(maxY, adjustedY))
     
+    // Avoid spawning inside bricks by checking if position is in brick area
+    const brickAreaTop = GameConfig.STATUS_BAR_HEIGHT + GameConfig.STATUS_BAR_MARGIN * 2
+    const brickAreaBottom = brickAreaTop + (GameConfig.BRICK_ROWS * (GameConfig.BRICK_HEIGHT + GameConfig.BRICK_SPACING)) + GameConfig.BRICK_SPACING
+    
+    if (adjustedY >= brickAreaTop && adjustedY <= brickAreaBottom) {
+      // If in brick area, move below it with some buffer
+      adjustedY = brickAreaBottom + ballRadius + 20
+    }
+    
     // Add small random Y offset to prevent perfect overlaps
     adjustedY += (Math.random() - 0.5) * 10
+    
+    // Ensure we haven't moved outside bounds after brick avoidance
+    adjustedY = Math.max(minY, Math.min(maxY, adjustedY))
     
     const newBall = new Ball(this, adjustedX, adjustedY)
     this.balls.push(newBall)
@@ -345,10 +357,15 @@ export class GameScene extends Phaser.Scene {
       }
     })
     
-    // Set velocity after ball is created
+    // Set velocity after ball is created with small delay to ensure physics stability
     if (newBall.body) {
       const body = newBall.body as Phaser.Physics.Arcade.Body
-      body.setVelocity(velocityX, velocityY)
+      // Use a small delay to ensure ball is properly positioned before setting velocity
+      this.time.delayedCall(10, () => {
+        if (newBall.body) {
+          body.setVelocity(velocityX, velocityY)
+        }
+      })
     }
     
     return newBall
