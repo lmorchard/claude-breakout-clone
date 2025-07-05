@@ -60,7 +60,7 @@ export class Powerup extends Phaser.Physics.Arcade.Sprite {
     }
   }
 
-  public activate(gameScene: any): void {
+  public activate(_gameScene: any): void {
     // To be overridden by subclasses
   }
 
