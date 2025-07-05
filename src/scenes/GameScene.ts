@@ -315,18 +315,37 @@ export class GameScene extends Phaser.Scene {
   }
 
   public addBall(x: number, y: number, velocityX: number, velocityY: number): Ball {
-    // Temporarily use a simpler approach - always spawn in safe zone below bricks
+    // Use a much simpler approach - spread balls out in safe zone
     const ballRadius = GameConfig.BALL_SIZE / 2
     const brickAreaTop = GameConfig.STATUS_BAR_HEIGHT + GameConfig.STATUS_BAR_MARGIN * 2
     const brickAreaBottom = brickAreaTop + (GameConfig.BRICK_ROWS * (GameConfig.BRICK_HEIGHT + GameConfig.BRICK_SPACING)) + GameConfig.BRICK_SPACING
-    const safeZoneY = brickAreaBottom + 100 // Well below bricks
     
-    // Clamp X to valid bounds
-    const minX = ballRadius
-    const maxX = GameConfig.GAME_WIDTH - ballRadius
-    const safeX = Math.max(minX, Math.min(maxX, x))
+    // Create spacing between balls based on current ball count
+    const ballSpacing = 60 // Minimum distance between balls
+    const currentBallCount = this.balls.length
+    const safeZoneY = brickAreaBottom + 100 + (currentBallCount * 15) // Stagger Y positions
     
-    console.log(`Spawning ball at safe position: (${safeX}, ${safeZoneY}) instead of preferred (${x}, ${y})`)
+    // Clamp X to valid bounds with more conservative margins
+    const minX = ballRadius + 20
+    const maxX = GameConfig.GAME_WIDTH - ballRadius - 20
+    let safeX = Math.max(minX, Math.min(maxX, x))
+    
+    // Add horizontal offset based on ball count to spread them out
+    safeX += (currentBallCount % 4 - 2) * ballSpacing // Spread across 4 positions
+    safeX = Math.max(minX, Math.min(maxX, safeX)) // Clamp again
+    
+    // Ensure velocities are never zero
+    let finalVelX = velocityX
+    let finalVelY = velocityY
+    
+    if (Math.abs(finalVelX) < 50) {
+      finalVelX = finalVelX >= 0 ? 100 : -100
+    }
+    if (Math.abs(finalVelY) < 50) {
+      finalVelY = finalVelY >= 0 ? 100 : -100
+    }
+    
+    console.log(`Spawning ball ${currentBallCount} at: (${safeX}, ${safeZoneY}) with velocity (${finalVelX}, ${finalVelY})`)
     
     const newBall = new Ball(this, safeX, safeZoneY)
     this.balls.push(newBall)
@@ -344,8 +363,8 @@ export class GameScene extends Phaser.Scene {
     // Set velocity immediately after ball is created
     if (newBall.body) {
       const body = newBall.body as Phaser.Physics.Arcade.Body
-      body.setVelocity(velocityX, velocityY)
-      console.log(`Set velocity: (${velocityX}, ${velocityY})`)
+      body.setVelocity(finalVelX, finalVelY)
+      console.log(`Set velocity: (${finalVelX}, ${finalVelY})`)
     }
     
     return newBall
