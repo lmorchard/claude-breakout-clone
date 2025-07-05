@@ -1,0 +1,22 @@
+{
+  "name": "claude-breakout-clone",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/node": "^24.0.10",
+    "typescript": "^5.8.3",
+    "vite": "^7.0.2"
+  },
+  "dependencies": {
+    "phaser": "^3.90.0"
+  }
+}
